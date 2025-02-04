@@ -18,19 +18,33 @@ const winningCombinations = [
   [0, 4, 8], [2, 4, 6]             // Diagonals
 ];
 
+function clearTime (turnTimeout,timerInterval){
+  clearTimeout(turnTimeout);
+  clearInterval(timerInterval);
+}
+
+function  resetGameState() {
+
+  currentPlayer = 'X';
+  gameActive = true;
+  cells.fill(null);
+  winnerDisplay.textContent = '';
+  clearTime(turnTimeout,timerInterval)
+
+  createBoard();
+}
 
 function createBoard() {
   board.innerHTML = '';
-  cells.forEach((_, index) => {
+  for (let index = 0; index < cells.length; index++) {
     const cell = document.createElement('div');
     cell.classList.add('cell');
     cell.dataset.index = index;
     cell.addEventListener('click', handleCellClick);
     board.appendChild(cell);
-  });
+  };
   resetTimer();
 }
-
 
 function handleCellClick(e) {
   const index = e.target.dataset.index;
@@ -45,16 +59,14 @@ function handleCellClick(e) {
   if (checkWinner()) {
     winnerDisplay.textContent = `${currentPlayer} wins!`;
     gameActive = false;
-    clearTimeout(turnTimeout);
-    clearInterval(timerInterval);
+    clearTime(turnTimeout,timerInterval)
     return;
   }
 
   if (cells.every(cell => cell)) {
     winnerDisplay.textContent = `It's a draw!`;
     gameActive = false;
-    clearTimeout(turnTimeout);
-    clearInterval(timerInterval);
+    clearTime(turnTimeout,timerInterval)
     return;
   }
 
@@ -68,41 +80,34 @@ function checkWinner() {
   });
 }
 
-function resetTimer() {
-  clearTimeout(turnTimeout);
+function handleTimerTick() {
+  timeLeft -= 1;
+  updateTimerDisplay();
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+  }
+}
+
+function handleTurnTimeout() {
+  gameActive = false;
   clearInterval(timerInterval);
+  winnerDisplay.textContent = `${currentPlayer === 'X' ? 'O' : 'X'} wins by timeout!`;
+}
+
+function resetTimer() {
+  clearTime(turnTimeout,timerInterval)
   timeLeft = 15;
   updateTimerDisplay();
 
-  timerInterval = setInterval(() => {
-    timeLeft -= 1;
-    updateTimerDisplay();
-    if (timeLeft <= 0) {
-      clearInterval(timerInterval);
-    }
-  }, 1000);
-
-  turnTimeout = setTimeout(() => {
-    gameActive = false;
-    clearInterval(timerInterval);
-    winnerDisplay.textContent = `${currentPlayer === 'X' ? 'O' : 'X'} wins by timeout!`;
-  }, 15000); 
+  timerInterval = setInterval(handleTimerTick, 1000);
+  turnTimeout = setTimeout(handleTurnTimeout, 15000);
 }
-
 
 function updateTimerDisplay() {
   timerContainer.textContent = `Time Left: ${timeLeft} seconds`;
 }
 
 // Restart the game
-restartButton.addEventListener('click', () => {
-  currentPlayer = 'X';
-  gameActive = true;
-  cells.fill(null);
-  winnerDisplay.textContent = '';
-  clearTimeout(turnTimeout);
-  clearInterval(timerInterval);
-  createBoard();
-});
+restartButton.addEventListener('click',resetGameState);
 
 createBoard();
