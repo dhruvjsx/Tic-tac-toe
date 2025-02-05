@@ -18,19 +18,18 @@ const winningCombinations = [
   [0, 4, 8], [2, 4, 6]             // Diagonals
 ];
 
-function clearTime (turnTimeout,timerInterval){
+function clearTime (){
   clearTimeout(turnTimeout);
   clearInterval(timerInterval);
 }
 
 function  resetGameState() {
-
   currentPlayer = 'X';
   gameActive = true;
   cells.fill(null);
   winnerDisplay.textContent = '';
-  clearTime(turnTimeout,timerInterval)
-
+  clearTime()
+  
   createBoard();
 }
 
@@ -40,7 +39,7 @@ function createBoard() {
     const cell = document.createElement('div');
     cell.classList.add('cell');
     cell.dataset.index = index;
-    cell.addEventListener('click', handleCellClick);
+    // cell.addEventListener('click', handleCellClick);
     board.appendChild(cell);
   };
   resetTimer();
@@ -59,19 +58,20 @@ function handleCellClick(e) {
   if (checkWinner()) {
     winnerDisplay.textContent = `${currentPlayer} wins!`;
     gameActive = false;
-    clearTime(turnTimeout,timerInterval)
+    clearTime()
     return;
   }
 
   if (cells.every(cell => cell)) {
     winnerDisplay.textContent = `It's a draw!`;
     gameActive = false;
-    clearTime(turnTimeout,timerInterval)
+    clearTime()
     return;
   }
 
   currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
   resetTimer();
+
 }
 
 function checkWinner() {
@@ -95,7 +95,7 @@ function handleTurnTimeout() {
 }
 
 function resetTimer() {
-  clearTime(turnTimeout,timerInterval)
+  clearTime()
   timeLeft = 15;
   updateTimerDisplay();
 
@@ -110,4 +110,6 @@ function updateTimerDisplay() {
 // Restart the game
 restartButton.addEventListener('click',resetGameState);
 
-createBoard();
+board.addEventListener('click', handleCellClick);
+
+document.addEventListener('DOMContentLoaded',createBoard,{ once: true } )
